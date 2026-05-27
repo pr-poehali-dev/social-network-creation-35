@@ -39,7 +39,7 @@ export default function Layout({ children }: LayoutProps) {
         {/* Logo */}
         <div className="px-6 py-5 border-b border-border">
           <span className="text-2xl font-bold gradient-text" style={{ fontFamily: 'Space Grotesk' }}>
-            Волна
+            Ванёк
           </span>
           <span className="ml-1 text-xs text-muted-foreground align-middle">beta</span>
         </div>
@@ -99,14 +99,14 @@ export default function Layout({ children }: LayoutProps) {
       )}
 
       {/* Mobile sidebar */}
-      <aside className={`fixed left-0 top-0 h-full w-64 bg-card border-r border-border z-50 lg:hidden transform transition-transform duration-300 ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}`}>
+      <aside className={`fixed left-0 top-0 h-full w-64 bg-card border-r border-border z-50 lg:hidden transform transition-transform duration-300 flex flex-col ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}`}>
         <div className="px-6 py-5 border-b border-border flex items-center justify-between">
-          <span className="text-2xl font-bold gradient-text" style={{ fontFamily: 'Space Grotesk' }}>Волна</span>
+          <span className="text-2xl font-bold gradient-text" style={{ fontFamily: 'Space Grotesk' }}>Ванёк</span>
           <button onClick={() => setSidebarOpen(false)} className="text-muted-foreground hover:text-foreground">
             <Icon name="X" size={20} />
           </button>
         </div>
-        <nav className="px-3 py-4 space-y-1 overflow-y-auto scrollbar-hide h-full">
+        <nav className="px-3 py-4 space-y-1 overflow-y-auto scrollbar-hide flex-1">
           {navItems.map(item => (
             <NavLink
               key={item.path}
@@ -127,6 +127,20 @@ export default function Layout({ children }: LayoutProps) {
             </NavLink>
           ))}
         </nav>
+        <div className="px-4 py-4 border-t border-border">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-full gradient-bg flex items-center justify-center text-xs font-bold text-white">
+              {initials}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium truncate">{user?.name}</p>
+              <p className="text-xs text-muted-foreground truncate">{user?.username}</p>
+            </div>
+            <button onClick={() => { setSidebarOpen(false); handleLogout(); }} title="Выйти" className="text-muted-foreground hover:text-destructive transition-colors">
+              <Icon name="LogOut" size={16} />
+            </button>
+          </div>
+        </div>
       </aside>
 
       {/* Main content */}
@@ -136,7 +150,7 @@ export default function Layout({ children }: LayoutProps) {
           <button onClick={() => setSidebarOpen(true)} className="text-muted-foreground hover:text-foreground">
             <Icon name="Menu" size={22} />
           </button>
-          <span className="text-lg font-bold gradient-text" style={{ fontFamily: 'Space Grotesk' }}>Волна</span>
+          <span className="text-lg font-bold gradient-text" style={{ fontFamily: 'Space Grotesk' }}>Ванёк</span>
           <div className="w-8 h-8 rounded-full gradient-bg flex items-center justify-center text-xs font-bold text-white">
             {initials}
           </div>

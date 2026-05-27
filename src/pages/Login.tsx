@@ -32,7 +32,7 @@ export default function Login() {
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold gradient-text" style={{ fontFamily: "Space Grotesk" }}>Волна</h1>
+          <h1 className="text-4xl font-bold gradient-text" style={{ fontFamily: "Space Grotesk" }}>Ванёк</h1>
           <p className="text-muted-foreground mt-2 text-sm">Войди, чтобы продолжить</p>
         </div>
 

@@ -35,7 +35,7 @@ export default function Register() {
     <div className="min-h-screen bg-background flex items-center justify-center px-4 py-8">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold gradient-text" style={{ fontFamily: "Space Grotesk" }}>Волна</h1>
+          <h1 className="text-4xl font-bold gradient-text" style={{ fontFamily: "Space Grotesk" }}>Ванёк</h1>
           <p className="text-muted-foreground mt-2 text-sm">Присоединяйся к сообществу</p>
         </div>
 
