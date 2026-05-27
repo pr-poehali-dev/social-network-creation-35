@@ -1,16 +1,9 @@
 import { createContext, useContext, useState, type ReactNode } from "react";
-
-interface AuthUser {
-  id: number;
-  name: string;
-  username: string;
-  email: string;
-}
+import { api, type AuthUser } from "@/lib/api";
 
 interface AuthContextType {
   user: AuthUser | null;
   login: (email: string, password: string) => Promise<void>;
-  register: (name: string, email: string, password: string) => Promise<void>;
   logout: () => void;
 }
 
@@ -22,38 +15,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return stored ? JSON.parse(stored) : null;
   });
 
-  const login = async (email: string, _password: string) => {
-    // Имитация входа — в будущем заменить на реальный API
-    await new Promise(r => setTimeout(r, 800));
-    const mockUser: AuthUser = {
-      id: 1,
-      name: email.split("@")[0].replace(/[._]/g, " ").replace(/\b\w/g, c => c.toUpperCase()),
-      username: "@" + email.split("@")[0],
-      email,
-    };
-    setUser(mockUser);
-    localStorage.setItem("volna_user", JSON.stringify(mockUser));
-  };
-
-  const register = async (name: string, email: string, _password: string) => {
-    await new Promise(r => setTimeout(r, 800));
-    const mockUser: AuthUser = {
-      id: Date.now(),
-      name,
-      username: "@" + email.split("@")[0],
-      email,
-    };
-    setUser(mockUser);
-    localStorage.setItem("volna_user", JSON.stringify(mockUser));
+  const login = async (email: string, password: string) => {
+    const { token, user: u } = await api.login(email, password);
+    localStorage.setItem("volna_token", token);
+    localStorage.setItem("volna_user", JSON.stringify(u));
+    setUser(u);
   };
 
   const logout = () => {
-    setUser(null);
+    api.logout();
+    localStorage.removeItem("volna_token");
     localStorage.removeItem("volna_user");
+    setUser(null);
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, register, logout }}>
+    <AuthContext.Provider value={{ user, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

@@ -20,8 +20,8 @@ export default function Login() {
     try {
       await login(email, password);
       navigate("/");
-    } catch {
-      setError("Ошибка входа. Попробуй ещё раз.");
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : "Ошибка входа");
     } finally {
       setLoading(false);
     }
@@ -92,20 +92,8 @@ export default function Login() {
             </button>
           </form>
 
-          <div className="relative my-2">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-border" />
-            </div>
-            <div className="relative flex justify-center">
-              <span className="bg-card px-3 text-xs text-muted-foreground">или</span>
-            </div>
-          </div>
-
-          <p className="text-center text-sm text-muted-foreground">
-            Нет аккаунта?{" "}
-            <Link to="/register" className="text-primary hover:text-accent transition-colors font-medium">
-              Зарегистрироваться
-            </Link>
+          <p className="text-center text-xs text-muted-foreground pt-1">
+            Доступ только по приглашению
           </p>
         </div>
       </div>
