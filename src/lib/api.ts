@@ -1,5 +1,8 @@
 const AUTH_URL = "https://functions.poehali.dev/75adb14b-1802-4ce8-bfc0-104f73f4c0de";
 const MUSIC_URL = "https://functions.poehali.dev/1448140c-439c-40e5-9420-a59f52efce05";
+const UPLOAD_URL = "https://functions.poehali.dev/3207a58e-b528-4b7b-89c1-da9fc2bba545";
+
+const CHUNK_SIZE = 4 * 1024 * 1024; // 4 МБ — меньше лимита шлюза
 
 function getToken(): string {
   return localStorage.getItem("volna_token") || "";
@@ -50,22 +53,50 @@ export const api = {
     return data.tracks as Track[];
   },
 
-  async uploadTrack(payload: {
-    title: string;
-    artist: string;
-    genre: string;
-    file_data: string;
-    file_name: string;
-    duration: string;
-  }) {
-    const r = await fetch(`${MUSIC_URL}?action=upload`, {
+  async uploadTrack(
+    file: File,
+    meta: { title: string; artist: string; genre: string; duration: string },
+    onProgress?: (pct: number) => void,
+  ) {
+    // Шаг 1: начинаем multipart upload
+    const r1 = await fetch(`${UPLOAD_URL}?action=start`, {
       method: "POST",
       headers: authHeaders(),
-      body: JSON.stringify(payload),
+      body: JSON.stringify({ file_name: file.name }),
     });
-    const data = await r.json();
-    if (!r.ok) throw new Error(data.error || "Ошибка загрузки");
-    return data;
+    const { upload_id, key } = await r1.json();
+    if (!r1.ok || !upload_id) throw new Error("Ошибка начала загрузки");
+
+    // Шаг 2: шлём файл чанками по 4 МБ
+    const totalChunks = Math.ceil(file.size / CHUNK_SIZE);
+    const parts: { part: number; etag: string }[] = [];
+
+    for (let i = 0; i < totalChunks; i++) {
+      const start = i * CHUNK_SIZE;
+      const chunk = file.slice(start, start + CHUNK_SIZE);
+      const arrayBuf = await chunk.arrayBuffer();
+      const b64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuf)));
+
+      const r = await fetch(
+        `${UPLOAD_URL}?action=chunk&upload_id=${encodeURIComponent(upload_id)}&key=${encodeURIComponent(key)}&part=${i + 1}`,
+        { method: "POST", headers: authHeaders(), body: JSON.stringify({ data: b64 }) }
+      );
+      const res = await r.json();
+      if (!r.ok) throw new Error(res.error || `Ошибка чанка ${i + 1}`);
+      parts.push({ part: i + 1, etag: res.etag });
+      onProgress?.(Math.round(((i + 1) / totalChunks) * 90));
+    }
+
+    // Шаг 3: завершаем upload и сохраняем трек в БД
+    const r3 = await fetch(`${UPLOAD_URL}?action=finish`, {
+      method: "POST",
+      headers: authHeaders(),
+      body: JSON.stringify({ upload_id, key, parts, ...meta }),
+    });
+    const result = await r3.json();
+    if (!r3.ok) throw new Error(result.error || "Ошибка завершения загрузки");
+    onProgress?.(100);
+    return result;
   },
 
   async deleteTrack(id: number) {

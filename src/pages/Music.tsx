@@ -28,6 +28,7 @@ export default function Music() {
   const [uploadGenre, setUploadGenre] = useState("Другое");
   const [uploadFile, setUploadFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadError, setUploadError] = useState("");
   const [uploadSuccess, setUploadSuccess] = useState(false);
 
@@ -139,28 +140,28 @@ export default function Music() {
 
   const handleUpload = async () => {
     if (!uploadFile || !uploadTitle.trim()) { setUploadError("Выбери файл и введи название"); return; }
-    setUploading(true); setUploadError("");
+    setUploading(true); setUploadError(""); setUploadProgress(0);
     try {
-      const base64 = await new Promise<string>((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve((reader.result as string).split(",")[1]);
-        reader.onerror = reject;
-        reader.readAsDataURL(uploadFile);
-      });
       const dur = await new Promise<string>((resolve) => {
         const audio = new Audio();
-        audio.src = URL.createObjectURL(uploadFile);
-        audio.onloadedmetadata = () => { resolve(fmt(audio.duration)); URL.revokeObjectURL(audio.src); };
+        const url = URL.createObjectURL(uploadFile);
+        audio.src = url;
+        audio.onloadedmetadata = () => { resolve(fmt(audio.duration)); URL.revokeObjectURL(url); };
         audio.onerror = () => resolve("");
       });
-      await api.uploadTrack({ title: uploadTitle.trim(), artist: uploadArtist.trim(), genre: uploadGenre, file_data: base64, file_name: uploadFile.name, duration: dur });
-      setUploadSuccess(true);
+      await api.uploadTrack(
+        uploadFile,
+        { title: uploadTitle.trim(), artist: uploadArtist.trim(), genre: uploadGenre, duration: dur },
+        (pct) => setUploadProgress(pct),
+      );
+      setUploadSuccess(true); setUploadProgress(100);
       setUploadTitle(""); setUploadArtist(""); setUploadFile(null); setUploadGenre("Другое");
       if (fileInputRef.current) fileInputRef.current.value = "";
       await fetchTracks();
-      setTimeout(() => { setUploadSuccess(false); setTab("tracks"); }, 1500);
+      setTimeout(() => { setUploadSuccess(false); setUploadProgress(0); setTab("tracks"); }, 1500);
     } catch (e: unknown) {
       setUploadError(e instanceof Error ? e.message : "Ошибка загрузки");
+      setUploadProgress(0);
     } finally { setUploading(false); }
   };
 
@@ -297,10 +298,22 @@ export default function Music() {
             </select>
           </div>
 
+          {uploading && uploadProgress > 0 && (
+            <div className="space-y-1">
+              <div className="flex justify-between text-xs text-muted-foreground">
+                <span>Загружаю...</span>
+                <span>{uploadProgress}%</span>
+              </div>
+              <div className="h-1.5 bg-secondary rounded-full overflow-hidden">
+                <div className="h-full gradient-bg rounded-full transition-all duration-300" style={{ width: `${uploadProgress}%` }} />
+              </div>
+            </div>
+          )}
+
           <button onClick={handleUpload} disabled={uploading || !uploadFile || !uploadTitle.trim()}
             className="w-full py-2.5 rounded-xl gradient-bg text-white font-semibold text-sm disabled:opacity-40 flex items-center justify-center gap-2">
             {uploading && <Icon name="Loader" size={16} className="animate-spin" />}
-            {uploading ? "Загружаю..." : "Загрузить трек"}
+            {uploading ? `Загружаю${uploadProgress > 0 ? ` ${uploadProgress}%` : "..."}` : "Загрузить трек"}
           </button>
         </div>
       )}
