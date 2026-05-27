@@ -3,6 +3,8 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { AuthProvider } from "@/context/AuthContext";
+import ProtectedRoute from "@/components/ProtectedRoute";
 import Layout from "@/components/Layout";
 import Feed from "@/pages/Feed";
 import Profile from "@/pages/Profile";
@@ -15,6 +17,8 @@ import Groups from "@/pages/Groups";
 import Channels from "@/pages/Channels";
 import Music from "@/pages/Music";
 import Radio from "@/pages/Radio";
+import Login from "@/pages/Login";
+import Register from "@/pages/Register";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -25,20 +29,24 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Layout><Feed /></Layout>} />
-          <Route path="/profile" element={<Layout><Profile /></Layout>} />
-          <Route path="/search" element={<Layout><Search /></Layout>} />
-          <Route path="/messages" element={<Layout><Messages /></Layout>} />
-          <Route path="/notifications" element={<Layout><Notifications /></Layout>} />
-          <Route path="/subscriptions" element={<Layout><Subscriptions /></Layout>} />
-          <Route path="/communities" element={<Layout><Communities /></Layout>} />
-          <Route path="/groups" element={<Layout><Groups /></Layout>} />
-          <Route path="/channels" element={<Layout><Channels /></Layout>} />
-          <Route path="/music" element={<Layout><Music /></Layout>} />
-          <Route path="/radio" element={<Layout><Radio /></Layout>} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        <AuthProvider>
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/" element={<ProtectedRoute><Layout><Feed /></Layout></ProtectedRoute>} />
+            <Route path="/profile" element={<ProtectedRoute><Layout><Profile /></Layout></ProtectedRoute>} />
+            <Route path="/search" element={<ProtectedRoute><Layout><Search /></Layout></ProtectedRoute>} />
+            <Route path="/messages" element={<ProtectedRoute><Layout><Messages /></Layout></ProtectedRoute>} />
+            <Route path="/notifications" element={<ProtectedRoute><Layout><Notifications /></Layout></ProtectedRoute>} />
+            <Route path="/subscriptions" element={<ProtectedRoute><Layout><Subscriptions /></Layout></ProtectedRoute>} />
+            <Route path="/communities" element={<ProtectedRoute><Layout><Communities /></Layout></ProtectedRoute>} />
+            <Route path="/groups" element={<ProtectedRoute><Layout><Groups /></Layout></ProtectedRoute>} />
+            <Route path="/channels" element={<ProtectedRoute><Layout><Channels /></Layout></ProtectedRoute>} />
+            <Route path="/music" element={<ProtectedRoute><Layout><Music /></Layout></ProtectedRoute>} />
+            <Route path="/radio" element={<ProtectedRoute><Layout><Radio /></Layout></ProtectedRoute>} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>

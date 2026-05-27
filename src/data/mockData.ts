@@ -170,20 +170,43 @@ export const CHANNELS = [
   { id: 4, name: "Новости мира", avatar: "НМ", subscribers: 890000, description: "Главное за день", verified: true, lastPost: "5 мин назад" },
 ];
 
-export const TRACKS = [
-  { id: 1, title: "Neon Dreams", artist: "SynthWave", duration: "3:42", cover: "НД", genre: "Synthwave", plays: 145000 },
-  { id: 2, title: "Midnight City", artist: "Urban Beat", duration: "4:15", cover: "МС", genre: "Electronic", plays: 234000 },
-  { id: 3, title: "Волны", artist: "Кира Смирнова", duration: "3:28", cover: "ВЛ", genre: "Indie Pop", plays: 89000 },
-  { id: 4, title: "Digital Rain", artist: "CodeMusic", duration: "5:01", cover: "ДР", genre: "Ambient", plays: 67000 },
-  { id: 5, title: "Солнечный бриз", artist: "Lo-Fi Lab", duration: "2:55", cover: "СБ", genre: "Lo-Fi", plays: 312000 },
-  { id: 6, title: "Aurora", artist: "NightSky", duration: "4:33", cover: "АР", genre: "Chill", plays: 198000 },
+export interface Track {
+  id: number;
+  title: string;
+  artist: string;
+  duration: string;
+  cover: string;
+  genre: string;
+  plays: number;
+  url: string;
+}
+
+export interface RadioStation {
+  id: number;
+  name: string;
+  genre: string;
+  listeners: number;
+  cover: string;
+  isPlaying: boolean;
+  url: string;
+}
+
+// Бесплатные треки с открытой лицензией CC (bensound.com)
+export const TRACKS: Track[] = [
+  { id: 1, title: "Acoustic Breeze", artist: "Benjamin Tissot", duration: "2:37", cover: "АБ", genre: "Acoustic", plays: 145000, url: "https://www.bensound.com/bensound-music/bensound-acousticbreeze.mp3" },
+  { id: 2, title: "Sunny", artist: "Benjamin Tissot", duration: "2:20", cover: "СН", genre: "Pop", plays: 234000, url: "https://www.bensound.com/bensound-music/bensound-sunny.mp3" },
+  { id: 3, title: "Creative Minds", artist: "Benjamin Tissot", duration: "2:48", cover: "КМ", genre: "Electronic", plays: 89000, url: "https://www.bensound.com/bensound-music/bensound-creativeminds.mp3" },
+  { id: 4, title: "Ukulele", artist: "Benjamin Tissot", duration: "2:06", cover: "УК", genre: "Indie", plays: 67000, url: "https://www.bensound.com/bensound-music/bensound-ukulele.mp3" },
+  { id: 5, title: "Once Again", artist: "Benjamin Tissot", duration: "3:24", cover: "ОА", genre: "Chill", plays: 312000, url: "https://www.bensound.com/bensound-music/bensound-onceagain.mp3" },
+  { id: 6, title: "Sweet", artist: "Benjamin Tissot", duration: "2:50", cover: "СВ", genre: "Pop", plays: 198000, url: "https://www.bensound.com/bensound-music/bensound-sweet.mp3" },
 ];
 
-export const RADIO_STATIONS = [
-  { id: 1, name: "Волна FM", genre: "Pop / Hits", listeners: 12400, cover: "ВФ", isPlaying: false },
-  { id: 2, name: "Chill Zone", genre: "Lo-Fi / Ambient", listeners: 8900, cover: "ЧЗ", isPlaying: false },
-  { id: 3, name: "Tech Beats", genre: "Electronic / Techno", listeners: 5600, cover: "ТБ", isPlaying: false },
-  { id: 4, name: "Indie Space", genre: "Indie / Alternative", listeners: 3400, cover: "ИС", isPlaying: false },
-  { id: 5, name: "Jazz Café", genre: "Jazz / Soul", listeners: 7800, cover: "ДК", isPlaying: false },
-  { id: 6, name: "Rock Radio", genre: "Rock / Metal", listeners: 9200, cover: "РР", isPlaying: false },
+// Реальные российские онлайн-радиостанции (публичные mp3-стримы)
+export const RADIO_STATIONS: RadioStation[] = [
+  { id: 1, name: "Европа Плюс", genre: "Pop / Hits", listeners: 12400, cover: "ЕП", isPlaying: false, url: "https://ep256.hostingradio.ru/europaplus256.mp3" },
+  { id: 2, name: "DFM", genre: "Electronic / Dance", listeners: 9200, cover: "ДФ", isPlaying: false, url: "https://dfm.hostingradio.ru/dfm96.aacp" },
+  { id: 3, name: "Радио Рекорд", genre: "Electronic / Techno", listeners: 8100, cover: "РР", isPlaying: false, url: "https://radiorecord.hostingradio.ru/rr96.aacp" },
+  { id: 4, name: "Радио Маяк", genre: "Разговорное / Хиты", listeners: 7800, cover: "МЯ", isPlaying: false, url: "https://icecast-vgtrk.cdnvideo.ru/mayakfm_mp3_128kbps" },
+  { id: 5, name: "Вести FM", genre: "Новости", listeners: 5600, cover: "ВФ", isPlaying: false, url: "https://icecast-vgtrk.cdnvideo.ru/vestifm_mp3_128kbps" },
+  { id: 6, name: "Юмор FM", genre: "Развлекательное", listeners: 4300, cover: "ЮФ", isPlaying: false, url: "https://humor.hostingradio.ru/humor96.aacp" },
 ];

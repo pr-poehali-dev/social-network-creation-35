@@ -1,6 +1,7 @@
-import { NavLink, useLocation } from "react-router-dom";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import Icon from "@/components/ui/icon";
 import { useState } from "react";
+import { useAuth } from "@/context/AuthContext";
 
 const navItems = [
   { path: "/", label: "Лента", icon: "Home" },
@@ -23,7 +24,12 @@ interface LayoutProps {
 export default function Layout({ children }: LayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
 
+  const handleLogout = () => { logout(); navigate("/login"); };
+
+  const initials = user?.name?.split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase() ?? "??";
   const currentPage = navItems.find(i => i.path === location.pathname)?.label ?? "Лента";
 
   return (
@@ -71,13 +77,15 @@ export default function Layout({ children }: LayoutProps) {
         <div className="px-4 py-4 border-t border-border">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-full gradient-bg flex items-center justify-center text-xs font-bold text-white">
-              АИ
+              {initials}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium truncate">Алекс Иванов</p>
-              <p className="text-xs text-muted-foreground truncate">@alexivan</p>
+              <p className="text-sm font-medium truncate">{user?.name}</p>
+              <p className="text-xs text-muted-foreground truncate">{user?.username}</p>
             </div>
-            <Icon name="Settings" size={16} className="text-muted-foreground cursor-pointer hover:text-foreground transition-colors" />
+            <button onClick={handleLogout} title="Выйти" className="text-muted-foreground cursor-pointer hover:text-destructive transition-colors">
+              <Icon name="LogOut" size={16} />
+            </button>
           </div>
         </div>
       </aside>
@@ -130,7 +138,7 @@ export default function Layout({ children }: LayoutProps) {
           </button>
           <span className="text-lg font-bold gradient-text" style={{ fontFamily: 'Space Grotesk' }}>Волна</span>
           <div className="w-8 h-8 rounded-full gradient-bg flex items-center justify-center text-xs font-bold text-white">
-            АИ
+            {initials}
           </div>
         </header>
 
