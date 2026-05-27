@@ -1,13 +1,43 @@
 import { useState } from "react";
 import Icon from "@/components/ui/icon";
 import { POSTS } from "@/data/mockData";
+import { useAuth } from "@/context/AuthContext";
+import { api } from "@/lib/api";
 
-const tabs = ["Посты", "Медиа", "Лайки", "Подписки", "Подписчики"] as const;
+const tabs = ["Посты", "Медиа", "Лайки", "Подписки", "Подписчики", "Настройки"] as const;
 type Tab = typeof tabs[number];
 
 export default function Profile() {
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<Tab>("Посты");
   const [following, setFollowing] = useState(false);
+
+  // Смена пароля
+  const [newPassword, setNewPassword] = useState("");
+  const [newPassword2, setNewPassword2] = useState("");
+  const [showPass, setShowPass] = useState(false);
+  const [pwdLoading, setPwdLoading] = useState(false);
+  const [pwdError, setPwdError] = useState("");
+  const [pwdSuccess, setPwdSuccess] = useState(false);
+
+  const handleChangePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (newPassword !== newPassword2) { setPwdError("Пароли не совпадают"); return; }
+    if (newPassword.length < 6) { setPwdError("Минимум 6 символов"); return; }
+    setPwdLoading(true); setPwdError(""); setPwdSuccess(false);
+    try {
+      await api.changePassword(newPassword);
+      setPwdSuccess(true);
+      setNewPassword(""); setNewPassword2("");
+      setTimeout(() => setPwdSuccess(false), 3000);
+    } catch (err: unknown) {
+      setPwdError(err instanceof Error ? err.message : "Ошибка");
+    } finally { setPwdLoading(false); }
+  };
+
+  const initials = user?.name?.split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase() ?? "??";
+  const displayName = user?.name ?? "Пользователь";
+  const displayUsername = user?.username ?? "@user";
 
   return (
     <div className="max-w-2xl mx-auto space-y-4">
@@ -16,7 +46,7 @@ export default function Profile() {
         <div className="h-36 rounded-2xl gradient-bg opacity-60" />
         <div className="absolute -bottom-6 left-4">
           <div className="w-20 h-20 rounded-full gradient-bg border-4 border-background flex items-center justify-center text-2xl font-bold text-white">
-            АИ
+            {initials}
           </div>
         </div>
         <div className="absolute top-3 right-3">
@@ -31,8 +61,8 @@ export default function Profile() {
       <div className="pt-8 space-y-3">
         <div className="flex items-start justify-between">
           <div>
-            <h1 className="text-xl font-bold">Алекс Иванов</h1>
-            <p className="text-muted-foreground text-sm">@alexivan</p>
+            <h1 className="text-xl font-bold">{displayName}</h1>
+            <p className="text-muted-foreground text-sm">{displayUsername}</p>
           </div>
           <div className="flex gap-2">
             <button className="p-2 rounded-xl border border-border hover:bg-secondary transition-colors">
@@ -118,7 +148,57 @@ export default function Profile() {
         </div>
       )}
 
-      {activeTab !== "Посты" && (
+      {activeTab === "Настройки" && (
+        <div className="max-w-sm space-y-5">
+          <div className="bg-card border border-border rounded-2xl p-5 space-y-4">
+            <h3 className="font-semibold text-sm flex items-center gap-2">
+              <Icon name="Lock" size={15} className="text-primary" />
+              Сменить пароль
+            </h3>
+            {pwdError && (
+              <div className="flex items-center gap-2 text-sm text-destructive bg-destructive/10 border border-destructive/20 rounded-xl px-3 py-2">
+                <Icon name="AlertCircle" size={14} />{pwdError}
+              </div>
+            )}
+            {pwdSuccess && (
+              <div className="flex items-center gap-2 text-sm text-green-400 bg-green-400/10 border border-green-400/20 rounded-xl px-3 py-2">
+                <Icon name="CheckCircle" size={14} />Пароль успешно изменён!
+              </div>
+            )}
+            <form onSubmit={handleChangePassword} className="space-y-3">
+              <div>
+                <label className="text-xs text-muted-foreground mb-1.5 block">Новый пароль</label>
+                <div className="relative">
+                  <input type={showPass ? "text" : "password"} value={newPassword} onChange={e => setNewPassword(e.target.value)}
+                    placeholder="Минимум 6 символов"
+                    className="w-full bg-secondary border border-border rounded-xl px-3 pr-10 py-2.5 text-sm outline-none focus:border-primary/50 transition-colors placeholder:text-muted-foreground" />
+                  <button type="button" onClick={() => setShowPass(!showPass)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+                    <Icon name={showPass ? "EyeOff" : "Eye"} size={15} />
+                  </button>
+                </div>
+              </div>
+              <div>
+                <label className="text-xs text-muted-foreground mb-1.5 block">Повтори пароль</label>
+                <input type={showPass ? "text" : "password"} value={newPassword2} onChange={e => setNewPassword2(e.target.value)}
+                  placeholder="Повтори новый пароль"
+                  className="w-full bg-secondary border border-border rounded-xl px-3 py-2.5 text-sm outline-none focus:border-primary/50 transition-colors placeholder:text-muted-foreground" />
+              </div>
+              <button type="submit" disabled={pwdLoading || !newPassword || !newPassword2}
+                className="w-full py-2.5 rounded-xl gradient-bg text-white font-semibold text-sm disabled:opacity-40 flex items-center justify-center gap-2">
+                {pwdLoading && <Icon name="Loader" size={15} className="animate-spin" />}
+                {pwdLoading ? "Сохраняю..." : "Сохранить пароль"}
+              </button>
+            </form>
+          </div>
+          <div className="bg-card border border-border rounded-2xl p-5 space-y-2">
+            <h3 className="font-semibold text-sm">Аккаунт</h3>
+            <p className="text-xs text-muted-foreground">Email: {user?.email}</p>
+            <p className="text-xs text-muted-foreground">Имя пользователя: {user?.username}</p>
+          </div>
+        </div>
+      )}
+
+      {activeTab !== "Посты" && activeTab !== "Настройки" && (
         <div className="py-16 text-center text-muted-foreground">
           <Icon name="Package" size={40} className="mx-auto mb-3 opacity-30" />
           <p className="text-sm">Здесь пока ничего нет</p>
